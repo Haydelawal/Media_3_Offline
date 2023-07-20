@@ -155,7 +155,7 @@ object DemoUtil {
                 Executors.newFixedThreadPool( /* nThreads= */6)
             )
             downloadTracker =
-                DownloadTracker(context, getHttpDataSourceFactory(context), downloadManager)
+                DownloadTracker(context, getHttpDataSourceFactory(context)!!, downloadManager!!)
         }
     }
 
@@ -170,7 +170,7 @@ object DemoUtil {
     @Synchronized
     private fun getDownloadDirectory(context: Context): File? {
         if (downloadDirectory == null) {
-            downloadDirectory = context.getExternalFilesDir( /* type= */null)
+            downloadDirectory = context.getExternalFilesDir( /* type = */null)
             if (downloadDirectory == null) {
                 downloadDirectory = context.filesDir
             }
