@@ -8,7 +8,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.Util
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.hls.HlsMediaSource
+//import androidx.media3.exoplayer.hls.HlsMediaSource
 import com.prateek.exoplayerdemo.databinding.ActivityMainBinding
 import com.prateek.exoplayerdemo.databinding.ActivityOnlinePlayerBinding
 import com.prateek.exoplayerdemo.manager.DemoUtil
@@ -94,9 +94,13 @@ class OnlinePlayerActivity : AppCompatActivity(), Player.Listener {
     }
 
     private fun initPlayer() {
-        player = ExoPlayer.Builder(this).build()
-        player?.playWhenReady = true
-        binding.playerExo.player = player
+        player = ExoPlayer.Builder(this)
+            .build()
+            .also{ exoPlayer ->
+                binding.playerExo.player = exoPlayer
+
+                player?.playWhenReady = true
+//                binding.playerExo.player = player
 
 
 //        val defaultHttpDataSourceFactory = DemoUtil.getDataSourceFactory(this)
@@ -104,29 +108,70 @@ class OnlinePlayerActivity : AppCompatActivity(), Player.Listener {
 //            HlsMediaSource.Factory(defaultHttpDataSourceFactory!!).createMediaSource(mediaItem)
 //        player?.setMediaSource(mediaSource)
 
-        val mediaItem = MediaItem.fromUri(VIDEO_URL)
+                val mediaItem = MediaItem.fromUri(VIDEO_URL)
 
-        // Update setMediaItems to include secondMediaItem
-        player?.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+                // Update setMediaItems to include secondMediaItem
+                exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+
+//
+                player?.seekTo(playbackPosition)
+//                player?.playWhenReady = playWhenReady
+//                player?.prepare()
+                exoPlayer.playWhenReady = playWhenReady
+//                exoPlayer.addListener(playbackStateListener) // Add this line
+
+                exoPlayer.prepare()
 
 
-        player?.seekTo(playbackPosition)
-        player?.playWhenReady = playWhenReady
-        player?.prepare()
+            }
+
 
     }
+
+//    private fun initializePlayer() {
+//        // ExoPlayer implements the Player interface
+//        player = ExoPlayer.Builder(this)
+//            .build()
+//            .also { exoPlayer ->
+//                binding.videoView.player = exoPlayer
+//
+//                val mediaItem = MediaItem.fromUri(args.videoData.media_url)
+//
+//                exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+//                exoPlayer.playWhenReady = playWhenReady
+//                exoPlayer.addListener(playbackStateListener) // Add this line
+//
+//                exoPlayer.prepare()
+//            }
+//    }
 
     private fun releasePlayer() {
-        player?.let {
-            playbackPosition = it.currentPosition
-            playWhenReady = it.playWhenReady
-            mediaItemIndex = it.currentMediaItemIndex
+        player?.let { player ->
+            playbackPosition = player.currentPosition
+            mediaItemIndex = player.currentMediaItemIndex
+            playWhenReady = player.playWhenReady
+//            player.removeListener(playbackStateListener)
 
-            it.release()
-            player = null
+            player.release()
         }
+        player = null
+
     }
 
+
+
+
+//    private fun releasePlayer() {
+//        player?.let { player ->
+//            playbackPosition = player.currentPosition
+//            mediaItemIndex = player.currentMediaItemIndex
+//            playWhenReady = player.playWhenReady
+//            player.removeListener(playbackStateListener)
+//
+//            player.release()
+//        }
+//        player = null
+//    }
 
 
     override fun onStart() {
@@ -162,4 +207,7 @@ class OnlinePlayerActivity : AppCompatActivity(), Player.Listener {
         super.onDestroy()
         releasePlayer()
     }
+
+
+
 }

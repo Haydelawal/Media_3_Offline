@@ -34,7 +34,7 @@ class OfflinePlayerActivity : AppCompatActivity(), Player.Listener {
     private var player: ExoPlayer? = null
     private var playbackPosition = 0L
     private var playWhenReady = true
-     var downloadCache: Cache? = null
+//     var downloadCache: Cache? = null
 
 
     private var mediaItemIndex = 0
@@ -83,37 +83,42 @@ class OfflinePlayerActivity : AppCompatActivity(), Player.Listener {
         val upstreamFactory =
             DefaultDataSource.Factory(this, DemoUtil.getHttpDataSourceFactory(this)!!)
 
-        val player =
+        player =
             ExoPlayer.Builder(this)
                 .setMediaSourceFactory(
                     DefaultMediaSourceFactory(this).setDataSourceFactory( buildReadOnlyCacheDataSource(upstreamFactory,  DemoUtil.getDownloadCache(this)))
                 )
                 .build()
-
+                .also { exoPlayer ->
+                    binding.playerExo.player = exoPlayer
 
 //        player = ExoPlayer.Builder(this).build()
-        player?.playWhenReady = true
-        binding.playerExo.player = player
+                    exoPlayer.playWhenReady = true
+//                    binding.playerExo.player = player
 
-        val mediaSource = downloadTracker?.getDownloadRequest(Uri.parse(VIDEO_URL))!!.let {
-                DownloadHelper.createMediaSource(
-                it,
-                DemoUtil.getDataSourceFactory(this)!!
-            )
+                    val mediaSource = downloadTracker?.getDownloadRequest(Uri.parse(VIDEO_URL))!!.let {
+                        DownloadHelper.createMediaSource(
+                            it,
+                            DemoUtil.getDataSourceFactory(this)!!
+                        )
 
 //                DownloadHelper.createMediaSource(
 //                    it,
 //                    DemoUtil.getDataSourceFactory(this)
 //                )
-            }
+                    }
 
 
 
-        // Update setMediaItems to include secondMediaItem
-        player.setMediaItems(listOf(mediaSource.mediaItem), mediaItemIndex, playbackPosition)
-        player.seekTo(playbackPosition)
-        player.playWhenReady = playWhenReady
-        player.prepare()
+                    // Update setMediaItems to include secondMediaItem
+                    exoPlayer.setMediaItems(listOf(mediaSource.mediaItem), mediaItemIndex, playbackPosition)
+                    exoPlayer.seekTo(playbackPosition)
+                    exoPlayer.playWhenReady = playWhenReady
+                    exoPlayer.prepare()
+
+                }
+
+
 
     }
 
@@ -129,14 +134,15 @@ class OfflinePlayerActivity : AppCompatActivity(), Player.Listener {
     }
 
     private fun releasePlayer() {
-        player?.let {
-            playbackPosition = it.currentPosition
-            playWhenReady = it.playWhenReady
-            mediaItemIndex = it.currentMediaItemIndex
+        player?.let {player ->
+            playbackPosition = player.currentPosition
+            mediaItemIndex = player.currentMediaItemIndex
+            playWhenReady = player.playWhenReady
+//            player.removeListener(playbackStateListener)
 
-            it.release()
-            player = null
+            player.release()
         }
+        player = null
     }
 
 
